@@ -178,4 +178,35 @@ describe('StellaEditor', () => {
     render(<StellaEditor value={createEmptyDocument()} onChange={() => {}} readOnly />);
     expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
   });
+
+  it('moves a block up from the block options menu', () => {
+    render(<StatefulEditor />);
+    const first = bodyTextbox();
+    fireEvent.change(first, { target: { value: 'First' } });
+    first.setSelectionRange(5, 5);
+    fireEvent.keyDown(first, { key: 'Enter' });
+    const second = screen.getAllByRole('textbox', { name: '' }).find((node) => node.classList.contains('se-block-input') && node !== first);
+    editContenteditable(second, 'Second');
+    const optionButtons = screen.getAllByRole('button', { name: 'Block options' });
+    fireEvent.click(optionButtons[optionButtons.length - 1]);
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Move up' }));
+    const inputs = document.querySelectorAll('.se-block-input');
+    expect(inputs[0].textContent).toBe('Second');
+    expect(inputs[1].textContent).toBe('First');
+  });
+
+  it('exits a list when Enter is pressed on an empty item', () => {
+    render(<StatefulEditor />);
+    fireEvent.click(screen.getByRole('button', { name: 'Bullet list' }));
+    const item = screen.getByLabelText('bullet list item 1');
+    fireEvent.keyDown(item, { key: 'Enter' });
+    expect(screen.queryByLabelText('bullet list item 1')).not.toBeInTheDocument();
+  });
+
+  it('filters slash commands by description text', () => {
+    render(<StatefulEditor />);
+    fireEvent.change(bodyTextbox(), { target: { value: '/checkboxes' } });
+    const palette = screen.getByRole('listbox');
+    expect(within(palette).getByRole('button', { name: 'Task list' })).toBeInTheDocument();
+  });
 });

@@ -1,0 +1,7 @@
+.demo-shell {
+  display: grid;
+  gap: 32px;
+  margin: 0 auto;
+  max-width: 1040px;
+  padding: 32px;
+}

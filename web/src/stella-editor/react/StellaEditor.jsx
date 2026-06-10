@@ -205,8 +205,10 @@ export function StellaEditor({
   const rootRef = useRef(null);
   const inputRefs = useRef(new Map());
   const splitPrefixByBlockId = useRef(new Map());
+  const lastEmittedDoc = useRef(null);
 
   useEffect(() => {
+    if (value && value === lastEmittedDoc.current) return;
     const next = normalizeDocument(value || createEmptyDocument());
     setDoc(next);
     const validation = validateDocument(next);
@@ -253,6 +255,7 @@ export function StellaEditor({
     setPast((items) => [...items, doc]);
     setFuture([]);
     setDoc(normalized);
+    lastEmittedDoc.current = normalized;
     onDirtyChange?.(true);
     onChange?.(normalized, { reason, dirty: true, changedAt: new Date().toISOString(), selection: { blockId: selectedBlockId } });
   }
@@ -331,11 +334,27 @@ export function StellaEditor({
   function selectedMarks() {
     const block = doc.content.find((item) => item.id === (textSelection?.blockId || selectedBlockId));
     if (!block?.content) return [];
-    const marks = new Set();
-    block.content.forEach((node) => {
-      if (node.type === 'text') (node.marks || []).forEach((mark) => marks.add(mark.type));
-    });
-    return [...marks];
+    const range = textSelection && textSelection.blockId === block.id && textSelection.start !== textSelection.end ? textSelection : null;
+    if (!range) {
+      const marks = new Set();
+      block.content.forEach((node) => {
+        if (node.type === 'text') (node.marks || []).forEach((mark) => marks.add(mark.type));
+      });
+      return [...marks];
+    }
+    let offset = 0;
+    let shared = null;
+    for (const node of block.content) {
+      if (node.type !== 'text') continue;
+      const nodeStart = offset;
+      const nodeEnd = offset + node.text.length;
+      offset = nodeEnd;
+      if (Math.max(range.start, nodeStart) >= Math.min(range.end, nodeEnd)) continue;
+      const nodeMarks = new Set((node.marks || []).map((mark) => mark.type));
+      shared = shared === null ? nodeMarks : new Set([...shared].filter((type) => nodeMarks.has(type)));
+      if (!shared.size) break;
+    }
+    return shared ? [...shared] : [];
   }
 
   function clearFormatting() {
@@ -361,6 +380,17 @@ export function StellaEditor({
     }
     if (change.kind === 'remove_list_item' && block.content.length > 1) {
       block.content.splice(change.itemIndex, 1);
+    }
+    if (change.kind === 'exit_list_item') {
+      block.content.splice(change.itemIndex, 1);
+      const paragraph = createParagraphBlock();
+      const blockIndex = next.content.findIndex((item) => item.id === blockId);
+      if (block.content.length) next.content.splice(blockIndex + 1, 0, paragraph);
+      else next.content.splice(blockIndex, 1, paragraph);
+      commit(next, 'exit_list');
+      setSelectedBlockId(paragraph.id);
+      focusBlock(paragraph.id);
+      return;
     }
     if (change.kind === 'task_checked') {
       const item = block.content[change.itemIndex];
@@ -475,6 +505,7 @@ export function StellaEditor({
     setPast((items) => items.slice(0, -1));
     setFuture((items) => [doc, ...items]);
     setDoc(previous);
+    lastEmittedDoc.current = previous;
     onChange?.(previous, { reason: 'undo', dirty: true });
   }
 
@@ -484,6 +515,7 @@ export function StellaEditor({
     setFuture(rest);
     setPast((items) => [...items, doc]);
     setDoc(next);
+    lastEmittedDoc.current = next;
     onChange?.(next, { reason: 'redo', dirty: true });
   }
 
@@ -724,6 +756,10 @@ export function StellaEditor({
         undoEdit();
       }
     }
+    if (mod && event.key.toLowerCase() === 'y') {
+      event.preventDefault();
+      redoEdit();
+    }
     if (mod && ['b', 'i', 'u'].includes(event.key.toLowerCase())) {
       event.preventDefault();
       const mark = event.key.toLowerCase() === 'b' ? 'bold' : event.key.toLowerCase() === 'i' ? 'italic' : 'underline';
@@ -805,6 +841,16 @@ export function StellaEditor({
   const insertCommands = insertMenuTargetId === null ? [] : getAllowedCommands(mergedAdapters, context, '');
   const selectedBlock = doc.content.find((block) => block.id === selectedBlockId) || doc.content[0];
 
+  function menuAnchorStyle(blockId) {
+    const root = rootRef.current;
+    const blockNode = root?.querySelector?.(`[data-block-id="${blockId}"]`);
+    if (!root || !blockNode || typeof blockNode.getBoundingClientRect !== 'function') return undefined;
+    const blockRect = blockNode.getBoundingClientRect();
+    const rootRect = root.getBoundingClientRect();
+    if (!blockRect.height && !blockRect.width) return undefined;
+    return { top: blockRect.bottom - rootRect.top + 6, left: blockRect.left - rootRect.left };
+  }
+
   function handleCanvasPointerDown(event) {
     if (event.target === rootRef.current) {
       setInsertMenuTargetId(null);
@@ -840,8 +886,8 @@ export function StellaEditor({
       }} onKeyDown={(event) => {
         if (event.key === 'Enter') focusAppendArea();
       }} />
-      {slashCommands.length ? <SlashMenu commands={slashCommands} activeIndex={slashActiveIndex} onSelect={handleSlashCommand} /> : null}
-      {insertCommands.length ? <SlashMenu variant="insert" commands={insertCommands} onSelect={handleInsertCommand} /> : null}
+      {slashCommands.length ? <SlashMenu commands={slashCommands} activeIndex={slashActiveIndex} onSelect={handleSlashCommand} style={menuAnchorStyle(selectedBlockId)} /> : null}
+      {insertCommands.length ? <SlashMenu variant="insert" commands={insertCommands} onSelect={handleInsertCommand} style={menuAnchorStyle(insertMenuTargetId)} /> : null}
     </section>
   );
 }

@@ -16,7 +16,10 @@ function Inline({ content = [], adapters, context }) {
       if (mark.type === 'link') {
         const href = mark.attrs?.kind === 'external_url' ? mark.attrs.href : adapters?.links?.getHref?.(mark.attrs?.reference, context);
         const visible = mark.attrs?.kind === 'external_url' || adapters?.scope?.isReferenceVisible?.(mark.attrs?.reference, context);
-        element = href && isSafeUrl(href) && visible ? <a key={`${index}-link`} href={href}>{element}</a> : <span key={`${index}-link`}>{element}</span>;
+        const external = mark.attrs?.kind === 'external_url';
+        element = href && isSafeUrl(href) && visible
+          ? <a key={`${index}-link`} href={href} target={external ? '_blank' : undefined} rel={external ? 'noopener noreferrer' : undefined}>{element}</a>
+          : <span key={`${index}-link`}>{element}</span>;
       }
     }
     return <React.Fragment key={index}>{element}</React.Fragment>;

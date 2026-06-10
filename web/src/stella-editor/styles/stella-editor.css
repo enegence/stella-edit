@@ -234,7 +234,8 @@
 .se-align-center { text-align: center; }
 .se-align-right { text-align: right; }
 
-::selection {
+.stella-editor ::selection,
+.stella-viewer ::selection {
   background: color-mix(in srgb, var(--se-accent) 34%, white);
 }
 
@@ -445,8 +446,23 @@
 }
 
 .se-slash-menu button {
+  align-items: flex-start;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 5px 8px;
   text-align: left;
-  width: 190px;
+  width: 230px;
+}
+
+.se-command-label {
+  font-size: 0.84rem;
+  font-weight: 600;
+}
+
+.se-command-description {
+  color: var(--se-muted);
+  font-size: 0.72rem;
 }
 
 .se-slash-menu button[data-active] {
@@ -856,14 +872,6 @@
     right: 0;
     top: 30px;
   }
-}
-
-.demo-shell {
-  display: grid;
-  gap: 32px;
-  margin: 0 auto;
-  max-width: 1040px;
-  padding: 32px;
 }
 
 @media (prefers-color-scheme: dark) {

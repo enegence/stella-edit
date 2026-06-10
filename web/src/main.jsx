@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { StellaEditor, StellaViewer, createEmptyDocument } from './stella-editor';
 import './stella-editor/styles/stella-editor.css';
+import './demo.css';
 
 function Demo() {
   const [doc, setDoc] = useState(() => createEmptyDocument({ title: 'Stella Editor Demo' }));

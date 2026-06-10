@@ -32,6 +32,8 @@ export function BlockToolbar({ onAction, dragHandleProps }) {
       <button type="button" className="se-gutter-button" aria-label="Block options" title="Block options" aria-expanded={open} onMouseDown={(event) => event.preventDefault()} onClick={() => setOpen((value) => !value)}>...</button>
       {open ? (
         <div className="se-block-menu" role="menu">
+          <button type="button" role="menuitem" onMouseDown={(event) => event.preventDefault()} onClick={() => selectAction('up')}>Move up</button>
+          <button type="button" role="menuitem" onMouseDown={(event) => event.preventDefault()} onClick={() => selectAction('down')}>Move down</button>
           <button type="button" role="menuitem" onMouseDown={(event) => event.preventDefault()} onClick={() => selectAction('duplicate')}>Duplicate</button>
           <button type="button" role="menuitem" onMouseDown={(event) => event.preventDefault()} onClick={() => selectAction('delete')}>Delete</button>
         </div>

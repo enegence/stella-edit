@@ -57,7 +57,8 @@ export function RichBlockEditor({ block, adapters, context, onChange, onTableAct
               onKeyDown={(event) => {
                 if (event.key === 'Enter') {
                   event.preventDefault();
-                  onChange({ kind: 'add_list_item', itemIndex: index });
+                  if (!listText(item)) onChange({ kind: 'exit_list_item', itemIndex: index });
+                  else onChange({ kind: 'add_list_item', itemIndex: index });
                 }
                 if (event.key === 'Backspace' && event.currentTarget.selectionStart === 0 && event.currentTarget.selectionEnd === 0 && block.content.length > 1) {
                   event.preventDefault();
