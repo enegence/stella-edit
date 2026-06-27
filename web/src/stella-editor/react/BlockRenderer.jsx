@@ -37,13 +37,16 @@ export function BlockRenderer({ block, adapters, context }) {
     }
     case 'blockquote':
       return <blockquote style={alignStyle}><Inline content={block.content} adapters={adapters} context={context} /></blockquote>;
-    case 'code_block':
+    case 'code_block': {
+      const customCodeBlock = adapters?.blocks?.renderCodeBlock?.(block, context);
+      if (customCodeBlock) return customCodeBlock;
       return (
         <div className="se-code-wrap">
           <button type="button" onClick={() => navigator.clipboard?.writeText(block.content?.[0]?.text || '')}>Copy</button>
           <pre><code>{block.content?.[0]?.text || ''}</code></pre>
         </div>
       );
+    }
     case 'divider':
       return <hr />;
     case 'panel':

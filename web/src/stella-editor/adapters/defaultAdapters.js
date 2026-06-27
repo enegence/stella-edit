@@ -41,6 +41,12 @@ export function createDefaultAdapters(overrides = {}) {
       searchReferences: () => [],
       searchAssets: () => [],
       ...overrides.autocomplete
+    },
+    blocks: {
+      // Host hook: return a React element to replace the default rendering of
+      // a code block (e.g. diagram languages), or null to keep the default.
+      renderCodeBlock: () => null,
+      ...overrides.blocks
     }
   };
 }

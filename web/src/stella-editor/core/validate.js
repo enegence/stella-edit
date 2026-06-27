@@ -1,4 +1,4 @@
-import { normalizeDocument, isSafeUrl } from './normalize';
+import { normalizeDocument, isSafeUrl } from './normalize.js';
 
 function visitRawNode(node, path, errors) {
   if (!node || typeof node !== 'object') return;

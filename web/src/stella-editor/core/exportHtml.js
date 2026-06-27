@@ -1,5 +1,5 @@
-import { normalizeDocument, isSafeUrl } from './normalize';
-import { inlineText } from './extractText';
+import { normalizeDocument, isSafeUrl } from './normalize.js';
+import { inlineText } from './extractText.js';
 
 function escapeHtml(value) {
   return String(value ?? '')
