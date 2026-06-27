@@ -1,5 +1,5 @@
-import { createHeadingBlock, createParagraphBlock, createTableBlock, createText } from './document';
-import { normalizeDocument, isSafeUrl } from './normalize';
+import { createHeadingBlock, createParagraphBlock, createTableBlock, createText } from './document.js';
+import { normalizeDocument, isSafeUrl } from './normalize.js';
 
 function stripUnsafeHtml(html) {
   return String(html || '')

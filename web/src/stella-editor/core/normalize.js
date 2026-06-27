@@ -1,5 +1,5 @@
-import { BLOCK_TYPES, MARK_TYPES, MEDIA_KINDS, PANEL_VARIANTS, STELLA_DOC_VERSION } from './schema';
-import { createId } from './ids';
+import { BLOCK_TYPES, MARK_TYPES, MEDIA_KINDS, PANEL_VARIANTS, STELLA_DOC_VERSION } from './schema.js';
+import { createId } from './ids.js';
 
 const EMPTY_TEXT_BLOCKS = new Set(['paragraph', 'heading', 'blockquote', 'code_block']);
 const CHILD_BLOCKS = new Set(['list_item', 'task_item', 'table_row', 'table_cell', 'layout_column']);

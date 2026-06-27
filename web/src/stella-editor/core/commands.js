@@ -1,6 +1,6 @@
-import { normalizeDocument } from './normalize';
-import { createHeadingBlock, createParagraphBlock, createPanelBlock, createTableBlock } from './document';
-import { cloneBlockWithNewIds, cloneDoc, findBlockIndex } from './transforms';
+import { normalizeDocument } from './normalize.js';
+import { createHeadingBlock, createParagraphBlock, createPanelBlock, createTableBlock } from './document.js';
+import { cloneBlockWithNewIds, cloneDoc, findBlockIndex } from './transforms.js';
 
 function result(doc, reason, changed = true, error = null) {
   return { doc: normalizeDocument(doc), selection: null, meta: { reason, changed, error } };

@@ -1,6 +1,6 @@
-import { STELLA_DOC_VERSION } from './schema';
-import { createId } from './ids';
-import { normalizeDocument } from './normalize';
+import { STELLA_DOC_VERSION } from './schema.js';
+import { createId } from './ids.js';
+import { normalizeDocument } from './normalize.js';
 
 export function createText(text = '', marks = []) {
   return { type: 'text', text: String(text ?? ''), marks };

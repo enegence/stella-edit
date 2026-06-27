@@ -20,7 +20,7 @@
 .stella-editor {
   background:
     radial-gradient(circle at 0 0, color-mix(in srgb, var(--se-accent) 12%, transparent), transparent 28rem),
-    linear-gradient(180deg, #fffdf9, #ffffff 22rem);
+    var(--se-bg);
   max-width: 920px;
   min-height: 420px;
   margin: 0 auto;

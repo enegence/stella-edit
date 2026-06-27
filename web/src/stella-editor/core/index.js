@@ -1,4 +1,4 @@
-export { STELLA_DOC_VERSION } from './schema';
+export { STELLA_DOC_VERSION } from './schema.js';
 export {
   createEmptyDocument,
   createParagraphBlock,
@@ -13,14 +13,14 @@ export {
   createListBlock,
   createTableBlock,
   createText
-} from './document';
-export { normalizeDocument, isSafeUrl } from './normalize';
-export { validateDocument } from './validate';
-export { extractText } from './extractText';
-export { exportMarkdown } from './exportMarkdown';
-export { exportHtml } from './exportHtml';
-export { sanitizePaste } from './sanitizePaste';
-export { importHtml } from './importHtml';
-export { importMarkdown } from './importMarkdown';
-export { applyCommand } from './commands';
-export { createHistory, pushHistory, undo, redo } from './history';
+} from './document.js';
+export { normalizeDocument, isSafeUrl } from './normalize.js';
+export { validateDocument } from './validate.js';
+export { extractText } from './extractText.js';
+export { exportMarkdown } from './exportMarkdown.js';
+export { exportHtml } from './exportHtml.js';
+export { sanitizePaste } from './sanitizePaste.js';
+export { importHtml } from './importHtml.js';
+export { importMarkdown } from './importMarkdown.js';
+export { applyCommand } from './commands.js';
+export { createHistory, pushHistory, undo, redo } from './history.js';

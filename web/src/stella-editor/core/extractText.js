@@ -1,4 +1,4 @@
-import { normalizeDocument } from './normalize';
+import { normalizeDocument } from './normalize.js';
 
 export function inlineText(content = []) {
   return content.map((node) => (node.type === 'text' ? node.text : '')).join('');

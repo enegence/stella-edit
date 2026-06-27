@@ -1,5 +1,5 @@
-import { normalizeDocument } from './normalize';
-import { createId } from './ids';
+import { normalizeDocument } from './normalize.js';
+import { createId } from './ids.js';
 
 export function cloneDoc(doc) {
   return JSON.parse(JSON.stringify(doc));

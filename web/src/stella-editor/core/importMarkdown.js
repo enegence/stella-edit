@@ -1,5 +1,5 @@
-import { createHeadingBlock, createParagraphBlock, createText } from './document';
-import { normalizeDocument } from './normalize';
+import { createHeadingBlock, createParagraphBlock, createText } from './document.js';
+import { normalizeDocument } from './normalize.js';
 
 export function importMarkdown(markdown = '') {
   const blocks = String(markdown).split(/\n{2,}/).filter(Boolean).map((chunk) => {
