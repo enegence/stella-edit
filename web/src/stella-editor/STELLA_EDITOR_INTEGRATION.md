@@ -196,7 +196,7 @@ Every block: `{ id: string, type: string, attrs: object, content: array }`. IDs 
 
 Marks: `bold`, `italic`, `underline`, `strike`, `code`, `color` (`attrs.color` hex), `link`.
 
-Link mark attrs — external: `{ kind: 'external_url', href, label? }`. Internal: `{ kind: 'document', reference: { type: 'document', id: 'doc_123' }, href: null, label }`. Internal links store **references, never URLs**; the host resolves them at render time via the link adapter.
+Link mark attrs — external: `{ kind: 'external_url', href, label? }`. Internal: `{ kind: 'document', reference: { type: 'document', id: 'doc_123' }, href: null, label }`. Internal links store **references, never URLs**; the host resolves them at render time via the link adapter. Host-typed: `{ kind: 'reference', reference: { type: 'card', ...host fields }, href: null, label }` — inserted when a link suggestion carries a `reference` object (see `searchLinkTargets`); the editor passes the object through untouched and runs it past `scope.canResolveReference` and `permissions.canLinkToTarget` like any internal link.
 
 ### 4.4 Normalization guarantees
 
@@ -227,7 +227,7 @@ const adapters = {
     isReferenceVisible(reference, context) {}        // viewer hides links when false
   },
   links: {
-    searchLinkTargets(query, context) {},   // [{ type:'document', id, label }] for the link popover
+    searchLinkTargets(query, context) {},   // [{ type:'document', id, label }] or [{ reference: { type, ... }, label, group?, description? }] for the link popover
     resolveLink(reference, context) {},
     getHref(reference, context) {},         // reference -> URL at render time
     getDisplayLabel(reference, context) {},

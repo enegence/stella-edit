@@ -771,17 +771,34 @@ export function StellaEditor({
     }
   }
 
-  function applyLink(href) {
-    if (href.startsWith('document:')) {
-      const reference = { type: 'document', id: href.slice('document:'.length) };
-      const scopeResult = mergedAdapters.scope.canResolveReference(reference, context);
-      const permission = mergedAdapters.permissions.canLinkToTarget(reference, context);
-      if (scopeResult?.allowed === false || permission?.allowed === false) {
-        onPermissionDenied?.({ action: 'insert_internal_link', reason: scopeResult?.reason || permission?.reason || 'Internal link is out of scope.' });
+  function applyReferenceLink(reference, label) {
+    const scopeResult = mergedAdapters.scope.canResolveReference(reference, context);
+    const permission = mergedAdapters.permissions.canLinkToTarget(reference, context);
+    if (scopeResult?.allowed === false || permission?.allowed === false) {
+      onPermissionDenied?.({ action: 'insert_internal_link', reason: scopeResult?.reason || permission?.reason || 'Internal link is out of scope.' });
+      return;
+    }
+    const kind = reference.type === 'document' ? 'document' : 'reference';
+    applyMark('link', { kind, reference, href: null, label: label || reference.id || '' });
+    setLinkOpen(false);
+  }
+
+  // `target` is either typed text (a URL or `document:<id>`) or a picked
+  // suggestion's typed reference: `{ reference: { type, ...host fields }, label }`.
+  function applyLink(target) {
+    if (target && typeof target === 'object') {
+      const reference = target.reference;
+      if (!reference || typeof reference !== 'object' || typeof reference.type !== 'string' || !reference.type) {
+        onPermissionDenied?.({ action: 'insert_internal_link', reason: 'Invalid link reference.' });
         return;
       }
-      applyMark('link', { kind: 'document', reference, href: null, label: reference.id });
-      setLinkOpen(false);
+      applyReferenceLink({ ...reference }, target.label);
+      return;
+    }
+    const href = String(target || '');
+    if (href.startsWith('document:')) {
+      const reference = { type: 'document', id: href.slice('document:'.length) };
+      applyReferenceLink(reference, reference.id);
       return;
     }
     if (!isSafeUrl(href)) {
