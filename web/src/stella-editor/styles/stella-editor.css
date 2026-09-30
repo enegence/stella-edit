@@ -408,27 +408,82 @@
 }
 
 .se-link-popover {
+  display: grid;
+  gap: 8px;
+  max-width: min(28rem, calc(100vw - 32px));
   position: sticky;
   top: 12px;
+  width: 28rem;
 }
 
 .se-link-popover input {
   border: 1px solid var(--se-border);
   border-radius: 6px;
   font: inherit;
-  padding: 4px 8px;
+  font-size: 0.875rem;
+  min-width: 0;
+  padding: 6px 10px;
 }
 
 .se-link-suggestions {
   display: grid;
-  gap: 2px;
-  grid-column: 1 / -1;
-  max-height: 180px;
+  gap: 6px;
+  max-height: 280px;
   overflow: auto;
+  overscroll-behavior: contain;
 }
 
-.se-link-suggestions button {
+.se-link-group {
+  display: grid;
+  gap: 2px;
+}
+
+.se-link-group-label {
+  color: var(--se-muted);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  padding: 2px 8px;
+  text-transform: uppercase;
+}
+
+.se-link-popover .se-link-suggestions button {
+  border-color: transparent;
+  display: grid;
+  gap: 1px;
+  font-size: 0.8rem;
+  padding: 6px 8px;
   text-align: left;
+}
+
+.se-link-popover .se-link-suggestions button:hover,
+.se-link-popover .se-link-suggestions button.is-active {
+  background: color-mix(in srgb, var(--se-accent) 10%, var(--se-bg));
+  border-color: color-mix(in srgb, var(--se-accent) 35%, var(--se-border));
+}
+
+.se-link-suggestion-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.se-link-suggestion-description {
+  color: var(--se-muted);
+  font-size: 0.72rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.se-link-actions {
+  display: flex;
+  gap: 6px;
+  justify-content: flex-end;
+}
+
+.se-link-actions button {
+  padding: 0 10px;
 }
 
 .se-slash-menu {

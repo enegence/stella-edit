@@ -128,7 +128,91 @@ describe('StellaEditor', () => {
     };
     render(<StellaEditor value={createEmptyDocument()} onChange={() => {}} adapters={adapters} />);
     fireEvent.click(screen.getByRole('button', { name: 'Link' }));
-    expect(await screen.findByRole('button', { name: 'Policy' })).toBeInTheDocument();
+    expect(await screen.findByRole('option', { name: 'Policy' })).toBeInTheDocument();
+  });
+
+  function linkAdapters(suggestions) {
+    return {
+      links: { searchLinkTargets: () => suggestions },
+      scope: {
+        canResolveReference: () => ({ allowed: true }),
+        isReferenceVisible: () => true
+      },
+      permissions: { canLinkToTarget: () => ({ allowed: true }) }
+    };
+  }
+
+  function LinkingEditor({ adapters, onDoc }) {
+    const [doc, setDoc] = useState(() => createEmptyDocument());
+    return <StellaEditor value={doc} onChange={(next) => { setDoc(next); onDoc(next); }} adapters={adapters} />;
+  }
+
+  function linkMarks(doc) {
+    const marks = [];
+    const visit = (node) => {
+      for (const mark of node?.marks || []) if (mark.type === 'link') marks.push(mark);
+      for (const child of node?.content || []) visit(child);
+    };
+    visit(doc);
+    return marks;
+  }
+
+  function selectWord(value) {
+    const textbox = bodyTextbox();
+    fireEvent.change(textbox, { target: { value } });
+    textbox.setSelectionRange(0, value.length);
+    fireEvent.select(textbox);
+  }
+
+  it('groups link suggestions under their headings', async () => {
+    render(<StellaEditor value={createEmptyDocument()} onChange={() => {}} adapters={linkAdapters([
+      { reference: { type: 'card', packId: 'p1', itemKey: 'c1' }, label: 'Paris', group: 'Cards', description: 'World Capitals' },
+      { type: 'document', id: 'doc_1', label: 'Policy', group: 'Pages' },
+      { reference: { type: 'card', packId: 'p1', itemKey: 'c2' }, label: 'Rome', group: 'Cards' }
+    ])} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Link' }));
+    const cards = await screen.findByRole('group', { name: 'Cards' });
+    expect(within(cards).getAllByRole('option').map((option) => option.textContent)).toEqual(['ParisWorld Capitals', 'Rome']);
+    expect(within(screen.getByRole('group', { name: 'Pages' })).getByRole('option', { name: 'Policy' })).toBeInTheDocument();
+  });
+
+  it('passes a picked typed reference through to the link mark', async () => {
+    const onDoc = vi.fn();
+    const reference = { type: 'card', packId: 'p1', itemKey: 'c1' };
+    render(<LinkingEditor onDoc={onDoc} adapters={linkAdapters([{ reference, label: 'Paris' }])} />);
+    selectWord('Paris');
+    fireEvent.click(screen.getAllByRole('button', { name: 'Link' })[0]);
+    fireEvent.click(await screen.findByRole('option', { name: 'Paris' }));
+    const [mark] = linkMarks(onDoc.mock.calls.at(-1)[0]);
+    expect(mark.attrs).toMatchObject({ kind: 'reference', reference, href: null, label: 'Paris' });
+  });
+
+  it('picks the highlighted suggestion with arrow keys and Enter', async () => {
+    const onDoc = vi.fn();
+    render(<LinkingEditor onDoc={onDoc} adapters={linkAdapters([
+      { type: 'document', id: 'doc_1', label: 'Policy' },
+      { reference: { type: 'document', id: 'doc_2' }, label: 'Handbook' }
+    ])} />);
+    selectWord('Rules');
+    fireEvent.click(screen.getAllByRole('button', { name: 'Link' })[0]);
+    await screen.findByRole('option', { name: 'Handbook' });
+    const input = screen.getByLabelText('Link URL');
+    fireEvent.keyDown(input, { key: 'ArrowDown' });
+    fireEvent.keyDown(input, { key: 'ArrowDown' });
+    expect(screen.getByRole('option', { name: 'Handbook' })).toHaveAttribute('aria-selected', 'true');
+    fireEvent.keyDown(input, { key: 'Enter' });
+    const [mark] = linkMarks(onDoc.mock.calls.at(-1)[0]);
+    expect(mark.attrs).toMatchObject({ kind: 'document', reference: { type: 'document', id: 'doc_2' } });
+  });
+
+  it('refuses a typed reference the permission adapter denies', async () => {
+    const onPermissionDenied = vi.fn();
+    const adapters = linkAdapters([{ reference: { type: 'card', packId: 'p1', itemKey: 'c1' }, label: 'Paris' }]);
+    adapters.permissions.canLinkToTarget = () => ({ allowed: false, reason: 'Nope' });
+    render(<StellaEditor value={createEmptyDocument()} onChange={() => {}} adapters={adapters} onPermissionDenied={onPermissionDenied} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Link' }));
+    fireEvent.click(await screen.findByRole('option', { name: 'Paris' }));
+    expect(onPermissionDenied).toHaveBeenCalledWith({ action: 'insert_internal_link', reason: 'Nope' });
   });
 
   it('uses visual table add controls', () => {
